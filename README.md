@@ -30,9 +30,11 @@ The backend listens on `http://localhost:3001`, and Vite proxies `/api` calls to
    inserted at the current cursor position.
 5. Use the reset button in the toolbar to disarm hidden typing.
 
-Every browser connected to the same backend sees the hidden filename list. The
-source text is still not previewed; it is fetched only when the first-line
-trigger matches and then appears through simulated typing.
+Every browser connected to the same backend sees the hidden filename list. On
+Cloudflare, hidden uploads are stored in a Durable Object so every device that
+opens the deployed link can see the same uploaded `.c` files. The source text is
+still not previewed; it is fetched only when the first-line trigger matches and
+then appears through simulated typing.
 
 To use it from another device on the same network, start the app with:
 

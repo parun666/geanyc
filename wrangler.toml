@@ -1,6 +1,16 @@
 name = "geanyc"
+main = "worker/index.js"
 compatibility_date = "2026-04-25"
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 not_found_handling = "single-page-application"
+
+[[durable_objects.bindings]]
+name = "HIDDEN_FILES"
+class_name = "HiddenFilesStore"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "HiddenFilesStore" ]
