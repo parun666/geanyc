@@ -27,6 +27,7 @@ import "./styles.css";
 
 const menuItems = ["File", "Edit", "Search", "View", "Document", "Project", "Build", "Tools", "Help"];
 const triggerPattern = /^\/\/\s*([^\\/:"*?<>|]+\.c)\s*$/i;
+const MAX_HIDDEN_FILE_BYTES = 200 * 1024;
 
 function App() {
   const editorRef = useRef(null);
@@ -69,7 +70,7 @@ function App() {
       }
       setServerHiddenFiles(result.files || []);
     } catch (error) {
-      appendOutput(`Hidden file list failed: ${error instanceof Error ? error.message : String(error)}`);
+      setServerHiddenFiles([]);
     }
   }, [appendOutput]);
 
@@ -108,6 +109,17 @@ function App() {
     }
 
     const text = await file.text();
+    const size = new Blob([text]).size;
+    if (size > MAX_HIDDEN_FILE_BYTES) {
+      appendOutput(`Upload rejected: "${file.name}" is larger than 200 KB.`);
+      return;
+    }
+
+    setUploadedFiles((current) => {
+      const next = new Map(current);
+      next.set(file.name, text);
+      return next;
+    });
 
     try {
       const response = await fetch("/api/hidden-files", {
@@ -120,15 +132,10 @@ function App() {
         throw new Error(result.error || "Upload failed.");
       }
 
-      setUploadedFiles((current) => {
-        const next = new Map(current);
-        next.set(file.name, text);
-        return next;
-      });
       await refreshHiddenFiles();
       appendOutput(`Hidden C file "${file.name}" uploaded to server. Type // ${file.name} on line 1 to activate.`);
     } catch (error) {
-      appendOutput(`Hidden upload failed: ${error instanceof Error ? error.message : String(error)}`);
+      appendOutput(`Hidden C file "${file.name}" loaded in this browser. Type // ${file.name} on line 1 to activate.`);
     }
   }, [appendOutput, refreshHiddenFiles]);
 

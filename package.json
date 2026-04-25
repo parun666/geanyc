@@ -8,6 +8,7 @@
     "client": "vite --host 0.0.0.0",
     "server": "node server/index.js",
     "build": "vite build",
+    "deploy": "npm run build && wrangler deploy",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
