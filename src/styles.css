@@ -202,10 +202,35 @@ input {
   font-size: 12px;
 }
 
-.hidden-list span {
+.hidden-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.hidden-file-row span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.hidden-file-row button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: #8a1f1f;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+.hidden-file-row button:hover {
+  background: #fff0f0;
+  border-color: #d9a6a6;
 }
 
 .editor-area {

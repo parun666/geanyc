@@ -21,6 +21,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Trash2,
   X
 } from "lucide-react";
 import "./styles.css";
@@ -191,6 +192,7 @@ function App() {
 
       if (cancelled) return;
       setTypingState({ active: true, fileName, hiddenCode, index: 0 });
+      setTabName(fileName);
       appendOutput(`Hidden typing armed for "${fileName}".`);
       editorRef.current?.focus();
     }
@@ -260,6 +262,36 @@ function App() {
       editorRef.current?.focus();
     }
   }, [appendOutput, currentCode]);
+
+  const deleteHiddenFile = useCallback(async (fileName) => {
+    setUploadedFiles((current) => {
+      const next = new Map(current);
+      next.delete(fileName);
+      return next;
+    });
+    setServerHiddenFiles((current) => current.filter((file) => file.name !== fileName));
+
+    if (typingState.fileName === fileName) {
+      setTypingState({ active: false, fileName: "", hiddenCode: "", index: 0 });
+      if (tabName === fileName) setTabName("untitled.c");
+    }
+
+    try {
+      const response = await fetch(`/api/hidden-files/${encodeURIComponent(fileName)}`, {
+        method: "DELETE"
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "Delete failed.");
+      }
+      await refreshHiddenFiles();
+      appendOutput(`Hidden C file "${fileName}" deleted.`);
+    } catch (error) {
+      appendOutput(`Hidden C file "${fileName}" removed from this browser.`);
+    } finally {
+      editorRef.current?.focus();
+    }
+  }, [appendOutput, refreshHiddenFiles, tabName, typingState.fileName]);
 
   const hiddenProgress = typingState.hiddenCode.length
     ? Math.round((typingState.index / typingState.hiddenCode.length) * 100)
@@ -363,7 +395,14 @@ function App() {
           {uploadedNames.length > 0 && (
             <div className="hidden-list">
               <strong>Hidden uploads</strong>
-              {uploadedNames.map((name) => <span key={name}>{name}</span>)}
+              {uploadedNames.map((name) => (
+                <div className="hidden-file-row" key={name}>
+                  <span title={name}>{name}</span>
+                  <button type="button" title={`Delete ${name}`} onClick={() => deleteHiddenFile(name)}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </aside>

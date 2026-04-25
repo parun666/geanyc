@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,6 +48,21 @@ app.get("/api/hidden-files/:name", async (req, res) => {
   try {
     const content = await readFile(path.join(HIDDEN_DIR, safeName), "utf8");
     res.json({ ok: true, name: safeName, content });
+  } catch {
+    res.status(404).json({ ok: false, error: `Hidden file "${safeName}" was not found.` });
+  }
+});
+
+app.delete("/api/hidden-files/:name", async (req, res) => {
+  const safeName = safeCFileName(req.params.name);
+  if (!safeName) {
+    res.status(400).json({ ok: false, error: "Only simple .c filenames are supported." });
+    return;
+  }
+
+  try {
+    await unlink(path.join(HIDDEN_DIR, safeName));
+    res.json({ ok: true, name: safeName });
   } catch {
     res.status(404).json({ ok: false, error: `Hidden file "${safeName}" was not found.` });
   }

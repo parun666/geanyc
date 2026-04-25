@@ -37,6 +37,22 @@ export class HiddenFilesStore {
       return json({ ok: true, name, content: file.content });
     }
 
+    if (request.method === "DELETE") {
+      const name = safeCFileName(decodeURIComponent(url.pathname.slice(1)));
+      if (!name) {
+        return json({ ok: false, error: "Only simple .c filenames are supported." }, 400);
+      }
+
+      const key = `file:${name}`;
+      const file = await this.state.storage.get(key);
+      if (!file) {
+        return json({ ok: false, error: `Hidden file "${name}" was not found.` }, 404);
+      }
+
+      await this.state.storage.delete(key);
+      return json({ ok: true, name });
+    }
+
     if (request.method === "POST" && url.pathname === "/") {
       let body;
       try {
