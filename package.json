@@ -8,7 +8,8 @@
     "client": "vite --host 0.0.0.0",
     "server": "node server/index.js",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -21,5 +22,9 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "vite": "^7.3.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.33.2",
+    "wrangler": "^4.85.0"
   }
 }
