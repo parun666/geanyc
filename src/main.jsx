@@ -30,6 +30,15 @@ const menuItems = ["File", "Edit", "Search", "View", "Document", "Project", "Bui
 const triggerPattern = /^\/\/\s*([^\\/:"*?<>|]+\.c)\s*$/i;
 const MAX_HIDDEN_FILE_BYTES = 200 * 1024;
 
+function normalizeHiddenCode(source) {
+  return String(source ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .filter((line) => line.trim().length > 0)
+    .map((line) => line.replace(/^[\t ]+|[\t ]+$/g, ""))
+    .join("\n");
+}
+
 function App() {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
@@ -189,6 +198,8 @@ function App() {
           return;
         }
       }
+
+      hiddenCode = normalizeHiddenCode(hiddenCode);
 
       if (cancelled) return;
       setTypingState({ active: true, fileName, hiddenCode, index: 0 });
